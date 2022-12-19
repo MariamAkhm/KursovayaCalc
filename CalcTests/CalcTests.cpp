@@ -10,29 +10,36 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-namespace UnitTest1
+namespace UnitTestCalc
 {
-    TEST_CLASS(UnitTest1)
+    TEST_CLASS(UnitTestCalc)
     {
     public:
-        TEST_METHOD(TestMethod1)
+        TEST_METHOD(Plus_minus_test)
         {
             std::string str = "5-(5-4)";
             double expected = 4;
             double res = calculate(str);
             Assert::AreEqual(expected, res);
         }
-        TEST_METHOD(TestMethod4)
+        TEST_METHOD(Devide_tests)
         {
             std::string str = "1/8";
             double expected = 0.125;
             double res = calculate(str);
             Assert::AreEqual(expected, res);
         }
-        TEST_METHOD(TestMethod6)
+        TEST_METHOD(Multiply_test)
         {
-            std::string str = "4^(1/2)";
-            double expected = 2;
+            std::string str = "5*2";
+            double expected = 10;
+            double res = calculate(str);
+            Assert::AreEqual(expected, res);
+        }
+        TEST_METHOD(Breckets_test)
+        {
+            std::string str = "5*(1-6)";
+            double expected = -25;
             double res = calculate(str);
             Assert::AreEqual(expected, res);
         }

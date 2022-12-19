@@ -4,35 +4,27 @@
 #include <stack>
 
 
-struct Leksema
+struct Token
 {
-    char type;
+    char kind;
     double value;
 };
 
 struct Expression
 {
-    std::stack<Leksema> numbers;
-    std::stack<Leksema> operations;
+    std::stack<Token> numbers;
+    std::stack<Token> operations;
 };
 
 int getRang(char expressionElement)
 {
-    if (expressionElement == 's' ||  expressionElement == 'c' ||  expressionElement == 't' || expressionElement == 'g' || expressionElement == 'e')
-    {
-        return 4;
-    }
-    if (expressionElement == '^')
-    {
-        return 3;
-    }
     if (expressionElement == '+' ||  expressionElement == '-')
     {
-        return 1;
+        return 2;
     }
     if (expressionElement == '*' || expressionElement == '/')
     {
-        return 2;
+        return 1;
     }
     else
     {
@@ -42,22 +34,22 @@ int getRang(char expressionElement)
 
 Expression calculateSubExpression(Expression expresion)
 {
-    std::stack<Leksema> numbers = expresion.numbers;
-    std::stack<Leksema> operations = expresion.operations;
-    Leksema item;
+    std::stack<Token> numbers = expresion.numbers;
+    std::stack<Token> operations = expresion.operations;
+    Token item;
 
     double leftOperand, rightOperand, operationResult;
     leftOperand = numbers.top().value;
     numbers.pop();
 
-    char currentOperationType = operations.top().type;
-    switch (currentOperationType)
+    char currentOperationType = operations.top().kind;
+    switch (currentOperationType) 
     {
     case '+':
         rightOperand = numbers.top().value;
         numbers.pop();
         operationResult = leftOperand + rightOperand;
-        item.type = '0';
+        item.kind = '0';
         item.value = operationResult;
         numbers.push(item);
         operations.pop();
@@ -66,16 +58,7 @@ Expression calculateSubExpression(Expression expresion)
         rightOperand = numbers.top().value;
         numbers.pop();
         operationResult = rightOperand - leftOperand;
-        item.type = '0';
-        item.value = operationResult;
-        numbers.push(item);
-        operations.pop();
-        break;
-    case '^':
-        rightOperand = numbers.top().value;
-        numbers.pop();
-        operationResult = pow(rightOperand, leftOperand);
-        item.type = '0';
+        item.kind = '0';
         item.value = operationResult;
         numbers.push(item);
         operations.pop();
@@ -84,7 +67,7 @@ Expression calculateSubExpression(Expression expresion)
         rightOperand = numbers.top().value;
         numbers.pop();
         operationResult = leftOperand * rightOperand;
-        item.type = '0';
+        item.kind = '0';
         item.value = operationResult;
         numbers.push(item);
         operations.pop();
@@ -99,7 +82,7 @@ Expression calculateSubExpression(Expression expresion)
         {
             numbers.pop();
             operationResult = (rightOperand / leftOperand);
-            item.type = '0';
+            item.kind = '0';
             item.value = operationResult;
             numbers.push(item);
             operations.pop();
@@ -107,7 +90,7 @@ Expression calculateSubExpression(Expression expresion)
         }
 
     default:
-        throw std::exception("Неподдерживаемая операция: " + operations.top().type);
+        throw std::exception("Неподдерживаемая операция: " + operations.top().kind);
     }
 
     Expression answer;
@@ -125,9 +108,9 @@ double calculate(std::string str)
 
     char currentExpressionElement;
     bool minusFlag = true;
-    std::stack<Leksema> numbers;
-    std::stack<Leksema> operations;
-    Leksema item;
+    std::stack<Token> numbers;
+    std::stack<Token> operations;
+    Token item;
     while (true)
     {
         currentExpressionElement = sstr.peek();
@@ -140,91 +123,35 @@ double calculate(std::string str)
             sstr.ignore();
             continue;
         }
-        if (currentExpressionElement == 's' || currentExpressionElement == 'c' || currentExpressionElement == 't'
-              ||  currentExpressionElement == 'e')
-            {
-                char foo[3];
-                for (int i = 0; i < 3; i++)
-                {
-                    currentExpressionElement = sstr.peek();
-                    foo[i] = currentExpressionElement;
-                    sstr.ignore();
-                }
-                if (foo[0] == 's' && foo[1] == 'i' && foo[2] == 'n')
-                {
-                    item.type = 's';
-                    item.value = 0;
-                    operations.push(item);
-                    continue;
-                }
-                if (foo[0] == 'c' && foo[1] == 'o' && foo[2] == 's')
-                {
-                    item.type = 'c';
-                    item.value = 0;
-                    operations.push(item);
-                    continue;
-                }
-                if (foo[0] == 't' && foo[1] == 'a' && foo[2] == 'n')
-                {
-                    item.type = 't';
-                    item.value = 0;
-                    operations.push(item);
-                    continue;
-                }
-                if (foo[0] == 'c' && foo[1] == 't' && foo[2] == 'g')
-                {
-                    item.type = 'g';
-                    item.value = 0;
-                    operations.push(item);
-                    continue;
-                }
-                if (foo[0] == 'e' && foo[1] == 'x' && foo[2] == 'p')
-                {
-                    item.type = 'e';
-                    item.value = 0;
-                    operations.push(item);
-                    continue;
-                }
-            }
-        if (currentExpressionElement == 'p')
-        {
-            item.type = '0';
-            const double Pi = acos(-1);
-            item.value = Pi;
-            numbers.push(item);
-            minusFlag = 0;
-            sstr.ignore();
-            continue;
-        }
         if (currentExpressionElement >= '0' && currentExpressionElement <= '9'
           ||  currentExpressionElement == '-' && minusFlag == 1)
         {
             sstr >> item.value;
-            item.type = '0';
+            item.kind = '0';
             numbers.push(item);
             minusFlag = 0;
             continue;
         }
         if (currentExpressionElement == '+' || currentExpressionElement == '-' && minusFlag == 0
-           || currentExpressionElement == '*' || currentExpressionElement == '/' || currentExpressionElement == '^')
+           || currentExpressionElement == '*' || currentExpressionElement == '/')
         {
             if (operations.size() == 0)
             {
-                item.type = currentExpressionElement;
+                item.kind = currentExpressionElement;
                 item.value = 0;
                 operations.push(item);
                 sstr.ignore();
                 continue;
             }
-            if (operations.size() != 0 && getRang(currentExpressionElement) > getRang(operations.top().type))
+            if (operations.size() != 0 && getRang(currentExpressionElement) > getRang(operations.top().kind))
             {
-                item.type = currentExpressionElement;
+                item.kind = currentExpressionElement;
                 item.value = 0;
                 operations.push(item);
                 sstr.ignore();
                 continue;
             }
-            if (operations.size() != 0 && getRang(currentExpressionElement) <= getRang(operations.top().type))
+            if (operations.size() != 0 && getRang(currentExpressionElement) <= getRang(operations.top().kind))
             {
                 Expression expression;
                 expression.numbers = numbers;
@@ -238,7 +165,7 @@ double calculate(std::string str)
         }
         if (currentExpressionElement == '(')
         {
-            item.type = currentExpressionElement;
+            item.kind = currentExpressionElement;
             item.value = 0;
             operations.push(item);
             sstr.ignore();
@@ -246,7 +173,7 @@ double calculate(std::string str)
         }
         if (currentExpressionElement == ')')
         {
-            while (operations.top().type != '(')
+            while (operations.top().kind != '(')
             {
                 Expression expression;
                 expression.numbers = numbers;
@@ -254,7 +181,7 @@ double calculate(std::string str)
                     Expression newExpression = calculateSubExpression(expression);
                 numbers = newExpression.numbers;
                 operations = newExpression.operations;
-                continue; //Если все хорошо
+                continue; 
             }
             operations.pop();
             sstr.ignore();
